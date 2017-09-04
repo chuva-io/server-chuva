@@ -1,11 +1,9 @@
 import App
-import MongoProvider
 
 let config = try Config()
-try config.addProvider(MongoProvider.Provider.self)
+//let config = try Config(arguments: ["vapor", "routes"])
 try config.setup()
 
-let drop = try Droplet()
+let drop = try Droplet(config)
 try drop.setup()
-
 try drop.run()

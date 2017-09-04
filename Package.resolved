@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "BSON",
+        "repositoryURL": "https://github.com/OpenKitten/BSON.git",
+        "state": {
+          "branch": null,
+          "revision": "4efeda0fd802c3bbdaffce264f05a50e12b436c1",
+          "version": "5.1.4"
+        }
+      },
+      {
         "package": "Bits",
         "repositoryURL": "https://github.com/vapor/bits.git",
         "state": {
@@ -26,6 +35,15 @@
           "branch": null,
           "revision": "fddec6a4643d6e85b6bb6dc54b1b5cdbabd395d2",
           "version": "1.1.2"
+        }
+      },
+      {
+        "package": "Cheetah",
+        "repositoryURL": "https://github.com/OpenKitten/Cheetah.git",
+        "state": {
+          "branch": null,
+          "revision": "b7e3bf3de9fe487cd5f07ac67d57d8bf730cb0c7",
+          "version": "1.0.3"
         }
       },
       {
@@ -53,6 +71,15 @@
           "branch": null,
           "revision": "bf4470b9da79024aab79c85de80374f6c29e3864",
           "version": "2.1.1"
+        }
+      },
+      {
+        "package": "CryptoKitten",
+        "repositoryURL": "https://github.com/OpenKitten/CryptoKitten.git",
+        "state": {
+          "branch": null,
+          "revision": "4482442bf944eb4768ae3d241cc53bb6f3696b1b",
+          "version": "0.2.1"
         }
       },
       {
@@ -101,6 +128,42 @@
         }
       },
       {
+        "package": "KittenCore",
+        "repositoryURL": "https://github.com/OpenKitten/KittenCore.git",
+        "state": {
+          "branch": null,
+          "revision": "ca1d4d3873a51dc24aba4f52df5a98d4401d2dcb",
+          "version": "0.2.3"
+        }
+      },
+      {
+        "package": "MongoDriver",
+        "repositoryURL": "https://github.com/vapor/mongo-driver.git",
+        "state": {
+          "branch": null,
+          "revision": "a84356fb2237a5643846181c292aa2aaf8d0df5f",
+          "version": "2.1.0"
+        }
+      },
+      {
+        "package": "MongoKitten",
+        "repositoryURL": "https://github.com/OpenKitten/MongoKitten.git",
+        "state": {
+          "branch": null,
+          "revision": "b43e9204b4e30593a5d58d61239f80e2dc21ab28",
+          "version": "4.0.14"
+        }
+      },
+      {
+        "package": "MongoProvider",
+        "repositoryURL": "https://github.com/vapor/mongo-provider.git",
+        "state": {
+          "branch": null,
+          "revision": "4e3ad71404d4b59699d37ec465ba3beaf35e2af8",
+          "version": "2.0.0"
+        }
+      },
+      {
         "package": "Multipart",
         "repositoryURL": "https://github.com/vapor/multipart.git",
         "state": {
@@ -143,6 +206,15 @@
           "branch": null,
           "revision": "f364a11e86dca9cac51b21c4a95cb5b214a669a3",
           "version": "2.1.0"
+        }
+      },
+      {
+        "package": "Schrodinger",
+        "repositoryURL": "https://github.com/OpenKitten/Schrodinger.git",
+        "state": {
+          "branch": null,
+          "revision": "d7030fe0a4a6eeddc02044650a8b409a4f57365a",
+          "version": "1.0.1"
         }
       },
       {

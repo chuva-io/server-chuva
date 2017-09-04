@@ -1,14 +1,11 @@
-import Vapor
-import Fluent
 import FluentProvider
-import Foundation
 
 final class User: Model {
     
     let storage = Storage()
     
     let firstName: String
-    let lastName: String
+    let lastName: String?
     let age: Int?
     
     init(row: Row) throws {
@@ -25,7 +22,7 @@ final class User: Model {
         return row
     }
     
-    init(firstName: String, lastName: String, age: Int? = nil) {
+    init(firstName: String, lastName: String?, age: Int? = nil) {
         self.firstName = firstName
         self.lastName = lastName
         self.age = age
@@ -46,9 +43,11 @@ extension User: JSONRepresentable {
 extension User: Timestampable { }
 extension User: Preparation {
     static func prepare(_ database: Database) throws {
-        try database.create(self) { builder in
-            builder.id()
-            builder.string("firstName")
+        try database.create(self) { user in
+            user.id()
+            user.string("firstName")
+            user.string("lastName")
+            user.int("age")
         }
     }
     
