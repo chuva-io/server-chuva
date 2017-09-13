@@ -5,9 +5,9 @@ final class Form: Model, JSONRepresentable {
     let storage = Storage()
     
     let title: String
-    let questions: [Question.Text]
+    let questions: [BaseQuestion]
     
-    init(title: String, questions: [Question.Text]) {
+    init(title: String, questions: [BaseQuestion]) {
         self.title = title
         self.questions = questions
     }
@@ -16,7 +16,7 @@ final class Form: Model, JSONRepresentable {
         var json = JSON()
         try json.set("id", id?.string)
         try json.set("title", title)
-        try json.set("questions", questions)
+        try json.set("questions", questions.map { try $0.makeJSON() })
         return json
     }
     
