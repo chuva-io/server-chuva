@@ -8,6 +8,7 @@ extension Droplet {
         resource("users", users)
         
         FormController.setupRoutes(self)
+        FormTemplateController.setupRoutes(self)
     }
     
 }
