@@ -7,8 +7,8 @@ extension Droplet {
         let users = UserController()
         resource("users", users)
         
-        let forms = FormController()
-        resource("forms", forms)
+//        let forms = FormController()
+//        resource("forms", forms)
 
 //        get("hello") { request in
 //            return "Hello!"

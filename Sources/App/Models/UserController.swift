@@ -2,25 +2,79 @@ import Vapor
 
 final class UserController {
     
+    // MARK: GET /users
     func index(_ request: Request) throws -> ResponseRepresentable {
         return try User.all().makeJSON()
     }
     
-    func show(_ request: Request, model: User) throws -> ResponseRepresentable {
-        let user = try request.parameters.next(User.self)
-        return user as! ResponseRepresentable
+    // MARK: GET /users/{_id}
+    func show(_ request: Request, user: User) throws -> ResponseRepresentable {
+        return try user.makeJSON()
     }
     
-    func create(_ request: Request) throws -> ResponseRepresentable {
-        let user = User(firstName: "Nilson", lastName: nil)
+    // MARK: POST /users
+    func store(_ request: Request) throws -> ResponseRepresentable {
+        guard let json = request.json else {
+            throw Abort(.badRequest, reason: "no json provided")
+        }
+        
+        let user: User
+        do {
+            user = try User(json: json)
+        }
+        catch {
+            throw Abort(.badRequest, reason: "bad json")
+        }
         try user.save()
-        return try User.find(user.id)?.makeJSON() ?? "error creating"
+        
+        return try Response(status: .created, json: user.makeJSON())
     }
     
+    // MARK: PUT /users/{_id}
+    func replace(_ request: Request, user: User) throws -> ResponseRepresentable {
+        guard let json = request.json else {
+            throw Abort(.badRequest, reason: "no json provided")
+        }
+        
+        // Constants
+        if let firstName: String = try json.get("firstName"),
+            user.firstName != firstName {
+            throw Abort(.forbidden, reason: "firstName cannot be changed")
+        }
+        
+        if let lastName: String = try json.get("lastName"),
+            user.lastName != lastName {
+            throw Abort(.forbidden, reason: "lastName cannot be changed")
+        }
+        
+        if let username: String = try json.get("username"),
+            user.username != username {
+            throw Abort(.forbidden, reason: "username cannot be changed")
+        }
+        
+        // Variables
+        guard let email: String = try json.get("email") else {
+            throw Abort(.badRequest, reason: "email not provided")
+        }
+        
+        user.email = email
+        try user.save()
+        return try user.makeJSON()
+    }
+    
+    // MARK: DELETE /users/{_id}
+    func destroy(_ request: Request, user: User) throws -> ResponseRepresentable {
+        try user.delete()
+        return Response(status: .noContent)
+    }
 }
 
 extension UserController: ResourceRepresentable {
     func makeResource() -> Resource<User> {
-        return Resource(index: index, store: create, show: show)
+        return Resource(index: index,
+                        store: store,
+                        show: show,
+                        replace: replace,
+                        destroy: destroy)
     }
 }
