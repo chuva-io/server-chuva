@@ -15,6 +15,11 @@ extension Question {
             self.answer = answer
         }
         
+        convenience init(json: JSON) throws {
+            self.init(title: try json.get("title"),
+                      answer: nil)
+        }
+        
         func makeJSON() throws -> JSON {
             var json = JSON()
             try json.set("id", id?.string)
@@ -41,4 +46,17 @@ extension Question {
         
     }
     
+}
+
+extension Question.Decimal: Preparation {
+    static func prepare(_ database: Database) throws {
+        try database.create(self) {
+            $0.id()
+            $0.string("title")
+        }
+    }
+    
+    static func revert(_ database: Database) throws {
+        try database.delete(self)
+    }
 }

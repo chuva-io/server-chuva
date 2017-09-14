@@ -1,6 +1,6 @@
 import FluentProvider
 
-protocol BaseQuestion: JSONRepresentable {
+protocol BaseQuestion: JSONConvertible, Model {
     var title: String { get }
     var baseAnswer: BaseAnswer? { get }
 }

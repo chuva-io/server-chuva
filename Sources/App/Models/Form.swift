@@ -1,6 +1,6 @@
 import FluentProvider
 
-final class Form: Model, JSONRepresentable {
+final class Form: Model, JSONConvertible {
     
     let storage = Storage()
     
@@ -10,6 +10,12 @@ final class Form: Model, JSONRepresentable {
     init(title: String, questions: [BaseQuestion]) {
         self.title = title
         self.questions = questions
+    }
+    
+    convenience init(json: JSON) throws {
+        let questionJson: [JSON] = try json.get("questions")
+        self.init(title: try json.get("title"),
+                  questions: try questionJson.map { try Question.initialize(json: $0) })
     }
     
     func makeJSON() throws -> JSON {

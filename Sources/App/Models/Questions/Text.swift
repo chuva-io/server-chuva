@@ -14,6 +14,10 @@ extension Question {
             self.answer = answer
         }
         
+        convenience init(json: JSON) throws {
+            self.init(title: try json.get("title"),
+                      answer: nil)
+        }
         
         let storage = Storage()
         
@@ -48,4 +52,17 @@ extension Question {
         }
     }
 
+}
+
+extension Question.Text: Preparation {
+    static func prepare(_ database: Database) throws {
+        try database.create(self) {
+            $0.id()
+            $0.string("title")
+        }
+    }
+    
+    static func revert(_ database: Database) throws {
+        try database.delete(self)
+    }
 }

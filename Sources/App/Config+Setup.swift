@@ -20,5 +20,10 @@ extension Config {
     private func setupPreparations() throws {
         preparations.append(User.self)
         preparations.append(Form.self)
+        preparations.append(Question.Text.self)
+        preparations.append(Question.Integer.self)
+        preparations.append(Question.Decimal.self)
+        preparations.append(Question.SingleChoice<String>.self)
+        preparations.append(Question.MultipleChoice<String>.self)
     }
 }

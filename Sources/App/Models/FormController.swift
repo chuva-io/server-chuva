@@ -10,7 +10,7 @@ final class FormController {
         
         // GET /forms
         droplet.get(collection) { request in
-            let forms = try chuvaMongoDb[collection].find()
+            let forms = try chuvaMongoDb[collection].find(projecting: ["questions.answer": .excluded])
             return forms.makeDocument().makeExtendedJSONString()
         }
         
@@ -19,20 +19,7 @@ final class FormController {
             guard let id = request.parameters["id"]?.string else {
                 throw Abort.badRequest
             }
-            
-            guard var form = try chuvaMongoDb[collection].findOne("_id" == ObjectId(id)) else {
-                throw Abort.notFound
-            }
-            
-            let formUserIds: [String] = Document(form["users"])!.arrayRepresentation.map { String($0)! }
-            
-            let users = try formUserIds.flatMap {
-                try chuvaMongoDb["users"].findOne("_id" == ObjectId($0))
-            }
-            
-            form["users"] = users
-            
-            return form.makeExtendedJSONString()
+            return try getForm(id: id).makeExtendedJSONString()
         }
         
         // GET /forms/:id/results
@@ -72,6 +59,38 @@ final class FormController {
             
             return expandedResults.makeDocument().makeExtendedJSONString()
         }
+        
+        // POST /forms
+        droplet.post(collection) { request in
+            guard let json = request.json else {
+                throw Abort(.badRequest, reason: "no json provided")
+            }
+            
+            let form: Form
+            do {
+                form = try Form(json: json)
+            }
+            catch {
+                throw Abort(.badRequest, reason: "bad json")
+            }
+            
+            _ = try form.questions.map { try $0.save() }
+            
+            try form.save()
+            return try form.makeJSON()
+        }
+    }
+    
+    static func getForm(id: String) throws -> Document {
+        guard var form = try chuvaMongoDb[collection].findOne("_id" == ObjectId(id)) else {
+            throw Abort.notFound
+        }
+        let formUserIds: [String] = Document(form["users"])!.arrayRepresentation.map { String($0)! }
+        let users = try formUserIds.flatMap {
+            try chuvaMongoDb["users"].findOne("_id" == ObjectId($0))
+        }
+        form["users"] = users
+        return form
     }
     
 }

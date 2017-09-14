@@ -15,6 +15,11 @@ extension Question {
             self.answer = answer
         }
         
+        convenience init(json: JSON) throws {
+            self.init(title: try json.get("title"),
+                      options: try json.get("options"),
+                      answer: nil)
+        }
         
         let storage = Storage()
         
@@ -44,5 +49,18 @@ extension Question {
             try row.set("type", type.rawValue)
             return row
         }
+    }
+}
+
+extension Question.MultipleChoice: Preparation {
+    static func prepare(_ database: Database) throws {
+        try database.create(self) {
+            $0.id()
+            $0.string("title")
+        }
+    }
+    
+    static func revert(_ database: Database) throws {
+        try database.delete(self)
     }
 }
