@@ -1,4 +1,5 @@
 import MongoProvider
+import AuthProvider
 
 extension Config {
     public func setup() throws {
@@ -13,6 +14,7 @@ extension Config {
     /// Configure providers
     private func setupProviders() throws {
         try addProvider(MongoProvider.Provider.self)
+        try addProvider(AuthProvider.Provider.self)
     }
     
     /// Add all models that should have their
