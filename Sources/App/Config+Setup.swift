@@ -9,6 +9,13 @@ extension Config {
 
         try setupProviders()
         try setupPreparations()
+        
+        switch environment {
+        case .test:
+            break
+        default:
+            break
+        }
     }
     
     /// Configure providers

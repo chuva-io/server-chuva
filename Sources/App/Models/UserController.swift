@@ -30,34 +30,30 @@ final class UserController {
         return try Response(status: .created, json: user.makeJSON())
     }
     
-    // MARK: PUT /users/{_id}
-    func replace(_ request: Request, user: User) throws -> ResponseRepresentable {
+    // MARK: PATCH /users/{_id}
+    func update(_ request: Request, user: User) throws -> ResponseRepresentable {
         guard let json = request.json else {
             throw Abort(.badRequest, reason: "no json provided")
         }
         
         // Constants
-        if let firstName: String = try json.get("firstName"),
-            user.firstName != firstName {
-            throw Abort(.forbidden, reason: "firstName cannot be changed")
-        }
-        
-        if let lastName: String = try json.get("lastName"),
-            user.lastName != lastName {
-            throw Abort(.forbidden, reason: "lastName cannot be changed")
-        }
-        
-        if let username: String = try json.get("username"),
-            user.username != username {
+        if let _: String = try json.get("username") {
             throw Abort(.forbidden, reason: "username cannot be changed")
         }
         
         // Variables
-        guard let email: String = try json.get("email") else {
-            throw Abort(.badRequest, reason: "email not provided")
+        if let firstName: String = try json.get("firstName") {
+            user.firstName = firstName
         }
         
-        user.email = email
+        if let lastName: String = try json.get("lastName") {
+            user.lastName = lastName
+        }
+        
+        if let email: String = try json.get("email") {
+            user.email = email
+        }
+        
         try user.save()
         return try user.makeJSON()
     }
@@ -74,7 +70,7 @@ extension UserController: ResourceRepresentable {
         return Resource(index: index,
                         store: store,
                         show: show,
-                        replace: replace,
+                        update: update,
                         destroy: destroy)
     }
 }

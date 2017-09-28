@@ -4,8 +4,8 @@ final class User: Model {
     
     let storage = Storage()
     
-    let firstName: String
-    let lastName: String
+    var firstName: String
+    var lastName: String
     let username: String
     var email: String
     
