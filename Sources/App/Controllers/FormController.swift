@@ -10,17 +10,17 @@ final class FormController {
         
         // GET /forms
         droplet.get(collection) { request in
-            let forms = try chuvaMongoDb[collection].find(projecting: ["questions.answer": .excluded])
+            let forms = try droplet.chuvaMongoDb()[collection].find(projecting: ["questions.answer": .excluded])
             return forms.makeDocument().makeExtendedJSONString()
         }
         
-        // GET /forms/:id
-        droplet.get(collection, ":id") { request in
-            guard let id = request.parameters["id"]?.string else {
-                throw Abort.badRequest
-            }
-            return try getForm(id: id).makeExtendedJSONString()
-        }
+//        // GET /forms/:id
+//        droplet.get(collection, ":id") { request in
+//            guard let id = request.parameters["id"]?.string else {
+//                throw Abort.badRequest
+//            }
+//            return try getForm(id: id).makeExtendedJSONString()
+//        }
         
         // GET /forms/:id/results
         droplet.get(collection, ":id", "results") { request in
@@ -30,19 +30,19 @@ final class FormController {
             }
             
             // Results for form id
-            let form_results = try chuvaMongoDb[results].find("form" == ObjectId(formId))
+            let form_results = try droplet.chuvaMongoDb()[results].find("form" == ObjectId(formId))
             
             let expandedResults: [Document] = try form_results.makeIterator().map {
                 var result = $0
                 
                 // Expand user objects
                 let userId = ObjectId(result["user"])!
-                let user = try chuvaMongoDb["users"].findOne("_id" == userId)
+                let user = try droplet.chuvaMongoDb()["users"].findOne("_id" == userId)
                 result["user"] = user
                 
                 // Expand question objects
                 var answers = Document(result["answers"])!.arrayRepresentation.map { Document($0)! }
-                let form = try chuvaMongoDb["forms"].findOne("_id" == ObjectId(formId))
+                let form = try droplet.chuvaMongoDb()["forms"].findOne("_id" == ObjectId(formId))
                 answers = answers.map {
                     var answer = $0
                     let questionId = ObjectId(answer["question"])!
@@ -81,16 +81,16 @@ final class FormController {
         }
     }
     
-    static func getForm(id: String) throws -> Document {
-        guard var form = try chuvaMongoDb[collection].findOne("_id" == ObjectId(id)) else {
-            throw Abort.notFound
-        }
-        let formUserIds: [String] = Document(form["users"])!.arrayRepresentation.map { String($0)! }
-        let users = try formUserIds.flatMap {
-            try chuvaMongoDb["users"].findOne("_id" == ObjectId($0))
-        }
-        form["users"] = users
-        return form
-    }
+//    static func getForm(id: String) throws -> Document {
+//        guard var form = try chuvaMongoDb[collection].findOne("_id" == ObjectId(id)) else {
+//            throw Abort.notFound
+//        }
+//        let formUserIds: [String] = Document(form["users"])!.arrayRepresentation.map { String($0)! }
+//        let users = try formUserIds.flatMap {
+//            try chuvaMongoDb["users"].findOne("_id" == ObjectId($0))
+//        }
+//        form["users"] = users
+//        return form
+//    }
     
 }
