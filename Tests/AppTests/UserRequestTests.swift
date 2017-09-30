@@ -12,7 +12,7 @@ class UserRequestTests: TestCase {
     }
     
     func newTestUser(firstName: String = "John", lastName: String = "Doe", username: String = "jdoe123", email: String = "jdoe123@doe.org") -> User {
-        return User(firstName: firstName, lastName: lastName, username: username, email: email)
+        return User(firstName: firstName, username: username, email: email)
     }
 
     // getting an instance of our drop with our configuration

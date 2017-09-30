@@ -4,8 +4,8 @@ final class User: Model {
     
     let storage = Storage()
     
-    var firstName: String
-    var lastName: String
+    var firstName: String? = nil
+    var lastName: String? = nil
     let username: String
     var email: String
     
@@ -25,7 +25,7 @@ final class User: Model {
         return row
     }
     
-    init(id: Identifier? = nil, firstName: String, lastName: String, username: String, email: String) {
+    init(id: Identifier? = nil, firstName: String? = nil, lastName: String? = nil, username: String, email: String) {
         self.firstName = firstName
         self.lastName = lastName
         self.username = username
