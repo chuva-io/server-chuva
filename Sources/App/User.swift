@@ -25,18 +25,20 @@ final class User: Model {
         return row
     }
     
-    init(firstName: String, lastName: String, username: String, email: String) {
+    init(id: Identifier? = nil, firstName: String, lastName: String, username: String, email: String) {
         self.firstName = firstName
         self.lastName = lastName
         self.username = username
         self.email = email
+        self.id = id
     }
 }
 
 extension User: JSONConvertible {
     
     convenience init(json: JSON) throws {
-        self.init(firstName: try json.get("firstName"),
+        self.init(id: try json.get("_id"),
+                  firstName: try json.get("firstName"),
                   lastName: try json.get("lastName"),
                   username: try json.get("username"),
                   email: try json.get("email"))
@@ -44,7 +46,7 @@ extension User: JSONConvertible {
     
     func makeJSON() throws -> JSON {
         var json = JSON()
-        try json.set("_id", id?.string)
+        try json.set("_id", id)
         try json.set("firstName", firstName)
         try json.set("lastName", lastName)
         try json.set("username", username)

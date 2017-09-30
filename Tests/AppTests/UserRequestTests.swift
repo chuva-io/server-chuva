@@ -17,11 +17,16 @@ class UserRequestTests: TestCase {
 
     // getting an instance of our drop with our configuration
     let drop = try! Droplet.testable()
+    
+    //MARK: - Tests
 
     func testCreateUser() throws {
         /***** ARRANGE *****/
         let user = newTestUser()
         let userJson = try user.makeJSON()
+        
+        // no users
+        XCTAssertEqual(try User.all().count, 0)
         
         
         /******* ACT *******/
@@ -33,6 +38,10 @@ class UserRequestTests: TestCase {
 
         
         /****** ASSERT *****/
+        
+        // user persisted
+        XCTAssertEqual(try User.all().count, 1)
+        
         // response is 201
         response.assertStatus(is: .created)
 
@@ -50,14 +59,6 @@ class UserRequestTests: TestCase {
         try response.assertJSON("lastName", equals: user.lastName)
         try response.assertJSON("username", equals: user.username)
         try response.assertJSON("email", equals: user.email)
-
-        /***** CLEAN UP *****/
-        guard let userId = responseJson["_id"]?.string,
-            let userToDelete = try User.find(userId) else {
-            XCTFail("Error could not convert id to string OR could not find user with id from response: \(response)")
-            return
-        }
-        try userToDelete.delete()
     }
     
     func testUpdateUserFirstName() throws {
@@ -93,9 +94,6 @@ class UserRequestTests: TestCase {
         try response.assertJSON("lastName", equals: user.lastName)
         try response.assertJSON("username", equals: user.username)
         try response.assertJSON("email", equals: user.email)
-        
-        /***** CLEAN UP *****/
-        try user.delete()
     }
 
     func testUpdateUserLastName() throws {
@@ -139,9 +137,6 @@ class UserRequestTests: TestCase {
         try response.assertJSON("lastName", equals: newLastName)
         try response.assertJSON("username", equals: user.username)
         try response.assertJSON("email", equals: user.email)
-        
-        /***** CLEAN UP *****/
-        try user.delete()
     }
 
     func testUpdateUserEmail() throws {
@@ -189,9 +184,6 @@ class UserRequestTests: TestCase {
         try response.assertJSON("lastName", equals: user.lastName)
         try response.assertJSON("username", equals: user.username)
         try response.assertJSON("email", equals: newEmail)
-        
-        /***** CLEAN UP *****/
-        try user.delete()
     }
 
     func testUpdateUsernameFails() throws {
@@ -228,9 +220,6 @@ class UserRequestTests: TestCase {
             XCTFail("Error getting json from response: \(response)")
             return
         }
-        
-        /***** CLEAN UP *****/
-        try user.delete()
     }
 
     func testGetUsers() throws {
@@ -259,10 +248,20 @@ class UserRequestTests: TestCase {
             users.append(try User(json: json))
         }
         
-        XCTAssertEqual(users.count, 1)
+        XCTAssertEqual(try User.all().count, 1)
         
-        /***** CLEAN UP *****/
-        try user.delete()
+        let user1 = users[0]
+        XCTAssertEqual(user.id, user1.id)
+        XCTAssertEqual(user.firstName, user1.firstName)
+        XCTAssertEqual(user.lastName, user1.lastName)
+        XCTAssertEqual(user.email, user1.email)
+        XCTAssertEqual(user.username, user1.username)
+        
+        try newTestUser().save()
+        XCTAssertEqual(try User.all().count, 2)
+        
+        try newTestUser().save()
+        XCTAssertEqual(try User.all().count, 3)
     }
 
 
