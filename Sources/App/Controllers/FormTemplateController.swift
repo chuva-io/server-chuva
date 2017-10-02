@@ -6,7 +6,7 @@ final class FormTemplateController {
     static func setupRoutes(_ droplet: Droplet) {
         
         droplet.get("form_templates") { request in
-            let forms = try droplet.chuvaMongoDb()["form_templates"].find()
+            let forms = try droplet.chuvaMongoDb["form_templates"].find()
             return forms.makeDocument().makeExtendedJSONString()
         }
         
@@ -15,7 +15,7 @@ final class FormTemplateController {
                 throw Abort.badRequest
             }
             
-            guard let form = try droplet.chuvaMongoDb()["form_templates"].findOne("_id" == ObjectId(id)) else {
+            guard let form = try droplet.chuvaMongoDb["form_templates"].findOne("_id" == ObjectId(id)) else {
                 throw Abort.notFound
             }
             

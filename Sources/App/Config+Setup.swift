@@ -22,6 +22,7 @@ extension Config {
     private func setupPreparations() throws {
         preparations.append(User.self)
         preparations.append(Form.self)
+        preparations.append(AuthToken.self)
         preparations.append(Question.Text.self)
         preparations.append(Question.Integer.self)
         preparations.append(Question.Decimal.self)

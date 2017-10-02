@@ -1,4 +1,5 @@
 import FluentProvider
+import AuthProvider
 
 final class User: Model {
     
@@ -37,7 +38,7 @@ final class User: Model {
 extension User: JSONConvertible {
     
     convenience init(json: JSON) throws {
-        self.init(id: try json.get("_id"),
+        self.init(id: try json.get("id"),
                   firstName: try json.get("firstName"),
                   lastName: try json.get("lastName"),
                   username: try json.get("username"),
@@ -46,7 +47,7 @@ extension User: JSONConvertible {
     
     func makeJSON() throws -> JSON {
         var json = JSON()
-        try json.set("_id", id)
+        try json.set("id", id)
         try json.set("firstName", firstName)
         try json.set("lastName", lastName)
         try json.set("username", username)
@@ -71,5 +72,15 @@ extension User: Preparation {
     
     static func revert(_ database: Database) throws {
         try database.delete(self)
+    }
+}
+
+extension User: TokenAuthenticatable {
+    public typealias TokenType = AuthToken
+}
+
+extension Request {
+    func authenticatedUser() throws -> User {
+        return try auth.assertAuthenticated()
     }
 }
