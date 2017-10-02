@@ -75,6 +75,7 @@ extension User: Preparation {
     }
 }
 
+//MARK: - TokenAuthenticatable
 extension User: TokenAuthenticatable {
     public typealias TokenType = AuthToken
 }
@@ -82,5 +83,16 @@ extension User: TokenAuthenticatable {
 extension Request {
     func authenticatedUser() throws -> User {
         return try auth.assertAuthenticated()
+    }
+}
+
+//MARK: - PasswordAuthenticatable
+extension User: PasswordAuthenticatable {
+    public static var usernameKey: String {
+        return "username"
+    }
+    
+    public static var passwordKey: String {
+        return "password"
     }
 }

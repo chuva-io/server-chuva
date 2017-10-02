@@ -7,7 +7,11 @@ extension Droplet {
         let users = UserController()
         resource("users", users)
         
-        authorized.get("me") { request in
+        passwordProtected.post("users/signin") { request in
+            return try request.authenticatedUser().makeJSON()
+        }
+        
+        authorized.get("users/me") { request in
             return try request.authenticatedUser().makeJSON()
         }
         

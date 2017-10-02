@@ -2,8 +2,11 @@
 import MongoKitten
 import AuthProvider
 
-fileprivate let tokenMiddleware = TokenAuthenticationMiddleware(User.self)
-fileprivate var auth: RouteBuilder!
+fileprivate let _tokenMiddleware = TokenAuthenticationMiddleware(User.self)
+fileprivate var _authorized: RouteBuilder!
+
+fileprivate let _passwordMiddleware = PasswordAuthenticationMiddleware(User.self)
+fileprivate var _passwordProtected: RouteBuilder!
 
 extension Droplet {
     
@@ -13,11 +16,16 @@ extension Droplet {
     }
     
     public var authorized: RouteBuilder {
-        return auth
+        return _authorized
+    }
+    
+    public var passwordProtected: RouteBuilder {
+        return _passwordProtected
     }
     
     public func setup() throws {
-        auth = grouped(tokenMiddleware)
+        _authorized = grouped(_tokenMiddleware)
+        _passwordProtected = grouped(_passwordMiddleware)
         try setupRoutes()
     }
 }
