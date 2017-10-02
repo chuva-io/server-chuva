@@ -9,12 +9,14 @@ final class User: Model {
     var lastName: String? = nil
     let username: String
     var email: String
+    var password: String
     
     init(row: Row) throws {
         firstName = try row.get("firstName")
         lastName = try row.get("lastName")
         username = try row.get("username")
         email = try row.get("email")
+        password = try row.get("password")
     }
 
     func makeRow() throws -> Row {
@@ -23,14 +25,16 @@ final class User: Model {
         try row.set("lastName", lastName)
         try row.set("username", username)
         try row.set("email", email)
+        try row.set("password", hashedPassword)
         return row
     }
     
-    init(id: Identifier? = nil, firstName: String? = nil, lastName: String? = nil, username: String, email: String) {
+    init(id: Identifier? = nil, firstName: String? = nil, lastName: String? = nil, username: String, email: String, password: String) {
         self.firstName = firstName
         self.lastName = lastName
         self.username = username
         self.email = email
+        self.password = password
         self.id = id
     }
 }
@@ -42,7 +46,8 @@ extension User: JSONConvertible {
                   firstName: try json.get("firstName"),
                   lastName: try json.get("lastName"),
                   username: try json.get("username"),
-                  email: try json.get("email"))
+                  email: try json.get("email"),
+                  password: try json.get("password"))
     }
     
     func makeJSON() throws -> JSON {
@@ -67,6 +72,7 @@ extension User: Preparation {
             user.string("lastName")
             user.string("username")
             user.string("email")
+            user.string("password")
         }
     }
     
@@ -87,12 +93,38 @@ extension Request {
 }
 
 //MARK: - PasswordAuthenticatable
+fileprivate let _hash = CryptoHasher(
+    hash: .sha256,
+    encoding: .hex
+)
+fileprivate let _passwordVerifier = Verifier()
+
 extension User: PasswordAuthenticatable {
+    
     public static var usernameKey: String {
         return "username"
     }
     
     public static var passwordKey: String {
         return "password"
+    }
+    
+    public var hashedPassword: String? {
+        let digest = try! _hash.make(password)
+        return digest.makeString()
+    }
+    
+    static var passwordVerifier: PasswordVerifier? {
+        return _passwordVerifier
+    }
+
+}
+
+fileprivate class Verifier: PasswordVerifier {
+    func verify(password: Bytes, matches hash: Bytes) throws -> Bool {
+        // FIX: password string appends ':'. e.g.: "password" -> ":password"
+        // Drop ':'. This is a temporary fix. Should fix in public source and submit PR.
+        let hackedPassword = password.makeString().dropFirst().data(using: .utf8)!.makeBytes()
+        return try _hash.check(_hash.make(hackedPassword), matchesHash: hash)
     }
 }
