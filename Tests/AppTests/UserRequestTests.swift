@@ -6,13 +6,8 @@ import XCTest
 
 class UserRequestTests: TestCase {
     
-    override func setUp() {
-        super.setUp()
-        try! User.all().forEach { try $0.delete() }
-    }
-    
-    func newTestUser(firstName: String = "John", lastName: String = "Doe", username: String = "jdoe123", email: String = "jdoe123@doe.org") -> User {
-        return User(firstName: firstName, username: username, email: email)
+    func newTestUser(firstName: String? = "John", lastName: String? = "Doe", username: String = "jdoe123", email: String = "jdoe123@doe.org") -> User {
+        return User(firstName: firstName, username: username, email: email, password: "password123")
     }
 
     // getting an instance of our drop with our configuration
@@ -24,10 +19,7 @@ class UserRequestTests: TestCase {
         /***** ARRANGE *****/
         let user = newTestUser()
         let userJson = try user.makeJSON()
-        
-        // no users
-        XCTAssertEqual(try User.all().count, 0)
-        
+        let startUserCount = try User.all().count
         
         /******* ACT *******/
         let request = Request(method: .post,
@@ -40,7 +32,7 @@ class UserRequestTests: TestCase {
         /****** ASSERT *****/
         
         // user persisted
-        XCTAssertEqual(try User.all().count, 1)
+        XCTAssertEqual(try User.all().count, startUserCount + 1)
         
         // response is 201
         response.assertStatus(is: .created)
