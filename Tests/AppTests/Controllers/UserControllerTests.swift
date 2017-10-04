@@ -4,18 +4,17 @@ import XCTest
 
 @testable import App
 
-class UserRequestTests: TestCase {
+class UserControllerTests: TestCase {
     
-    func newTestUser(firstName: String? = "John", lastName: String? = "Doe", username: String = "jdoe123", email: String = "jdoe123@doe.org") -> User {
-        return User(firstName: firstName, username: username, email: email, password: "password123")
-    }
-
-    // getting an instance of our drop with our configuration
     let drop = try! Droplet.testable()
+    
+    func newTestUser(username: String = "jdoe123", firstName: String? = "John", lastName: String? = "Doe", email: String? = "jdoe123@doe.org", password: String = "password123") -> User {
+        return User(username: username, password: "password123", firstName: firstName, email: email)
+    }
     
     //MARK: - Tests
 
-    func testCreateUser() throws {
+    func test_Post() throws {
         /***** ARRANGE *****/
         let user = newTestUser()
         let userJson = try user.makeJSON()
@@ -53,7 +52,7 @@ class UserRequestTests: TestCase {
         try response.assertJSON("email", equals: user.email)
     }
     
-    func testUpdateUserFirstName() throws {
+    func test_PatchFirstName() throws {
         /***** ARRANGE *****/
         let user = newTestUser()
         try user.save()
@@ -88,7 +87,7 @@ class UserRequestTests: TestCase {
         try response.assertJSON("email", equals: user.email)
     }
 
-    func testUpdateUserLastName() throws {
+    func test_PatchLastName() throws {
         /***** ARRANGE *****/
         
         // Objects
@@ -131,7 +130,7 @@ class UserRequestTests: TestCase {
         try response.assertJSON("email", equals: user.email)
     }
 
-    func testUpdateUserEmail() throws {
+    func test_PatchEmail() throws {
         /***** ARRANGE *****/
         
         // Objects
@@ -178,7 +177,7 @@ class UserRequestTests: TestCase {
         try response.assertJSON("email", equals: newEmail)
     }
 
-    func testUpdateUsernameFails() throws {
+    func test_PatchUsernameFails() throws {
         /***** ARRANGE *****/
         
         // Objects
@@ -214,7 +213,7 @@ class UserRequestTests: TestCase {
         }
     }
 
-    func testGetUsers() throws {
+    func test_Get() throws {
         /***** ARRANGE *****/
         let user = newTestUser()
         try user.save()

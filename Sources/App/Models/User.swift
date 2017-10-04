@@ -5,11 +5,11 @@ final class User: Model {
     
     let storage = Storage()
     
+    let username: String
+    var password: String
     var firstName: String? = nil
     var lastName: String? = nil
-    let username: String
-    var email: String
-    var password: String
+    var email: String? = nil
     
     init(row: Row) throws {
         firstName = try row.get("firstName")
@@ -29,25 +29,25 @@ final class User: Model {
         return row
     }
     
-    init(id: Identifier? = nil, firstName: String? = nil, lastName: String? = nil, username: String, email: String, password: String) {
-        self.firstName = firstName
-        self.lastName = lastName
+    init(username: String, password: String, id: Identifier? = nil, firstName: String? = nil, lastName: String? = nil, email: String? = nil) {
         self.username = username
-        self.email = email
         self.password = password
         self.id = id
+        self.firstName = firstName
+        self.lastName = lastName
+        self.email = email
     }
 }
 
 extension User: JSONConvertible {
     
     convenience init(json: JSON) throws {
-        self.init(id: try json.get("id"),
+        self.init(username: try json.get("username"),
+                  password: try json.get("password"),
+                  id: try json.get("id"),
                   firstName: try json.get("firstName"),
                   lastName: try json.get("lastName"),
-                  username: try json.get("username"),
-                  email: try json.get("email"),
-                  password: try json.get("password"))
+                  email: try json.get("email"))
     }
     
     func makeJSON() throws -> JSON {
