@@ -13,13 +13,13 @@ final class AuthToken: Model {
 
     init(row: Row) throws {
         token = try row.get("token")
-        userId = try row.get("user_id")
+        userId = try row.get("user__id")
     }
 
     func makeRow() throws -> Row {
         var row = Row()
         try row.set("token", token)
-        try row.set("user_id", userId)
+        try row.set("user__id", userId)
         return row
     }
 

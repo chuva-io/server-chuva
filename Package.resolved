@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/vapor/auth.git",
         "state": {
           "branch": null,
-          "revision": "f5834fbcb6e658ae8313195cb915ebb475f4a6a8",
-          "version": "1.2.0"
+          "revision": "b8a0d6d7ac141831c999bf2458408dc2ec2edb39",
+          "version": "1.2.1"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/OpenKitten/BSON.git",
         "state": {
           "branch": null,
-          "revision": "4efeda0fd802c3bbdaffce264f05a50e12b436c1",
-          "version": "5.1.4"
+          "revision": "eb4ff0def92e8a74aa44f9f927ebae5bc3a05f57",
+          "version": "5.1.5"
         }
       },
       {
@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/OpenKitten/CryptoKitten.git",
         "state": {
           "branch": null,
-          "revision": "4482442bf944eb4768ae3d241cc53bb6f3696b1b",
-          "version": "0.2.1"
+          "revision": "bf7a4d6dbd6f4bbd96ae620101239446d2cdd3f9",
+          "version": "0.2.3"
         }
       },
       {
@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
           "branch": null,
-          "revision": "2aad260d66212d780f8a0857a72a8840cef6eff7",
-          "version": "2.3.0"
+          "revision": "9f94af35b177b5a5fdc40a81703e68c072c5013d",
+          "version": "2.4.1"
         }
       },
       {
@@ -132,8 +132,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-provider.git",
         "state": {
           "branch": null,
-          "revision": "baaa6091c175382661d3a8a2b2ecb440986a37cb",
-          "version": "1.1.1"
+          "revision": "3bb67ad0be2df74367087e90391436b4336e7962",
+          "version": "1.2.0"
         }
       },
       {
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/vapor/json.git",
         "state": {
           "branch": null,
-          "revision": "5c2a62771cefdb04b1f96f4ccc52b581fe20cfb1",
-          "version": "2.2.0"
+          "revision": "735800d8f2e75ebe3be25559eb6a781f4666dcfc",
+          "version": "2.2.1"
         }
       },
       {
@@ -159,8 +159,8 @@
         "repositoryURL": "https://github.com/vapor/mongo-driver.git",
         "state": {
           "branch": null,
-          "revision": "a84356fb2237a5643846181c292aa2aaf8d0df5f",
-          "version": "2.1.0"
+          "revision": "c0fc3422d326615162b63e0475dc02ce3cc1ca40",
+          "version": "2.1.2"
         }
       },
       {
@@ -168,8 +168,8 @@
         "repositoryURL": "https://github.com/OpenKitten/MongoKitten.git",
         "state": {
           "branch": null,
-          "revision": "b43e9204b4e30593a5d58d61239f80e2dc21ab28",
-          "version": "4.0.14"
+          "revision": "611b2b396d558cbe82b97c599bbc748c06611741",
+          "version": "4.0.16"
         }
       },
       {
@@ -213,8 +213,8 @@
         "repositoryURL": "https://github.com/vapor/routing.git",
         "state": {
           "branch": null,
-          "revision": "66750975f5e5abaacf4bfa4d37ec85dd20c89312",
-          "version": "2.1.0"
+          "revision": "cb9d78aca2540c1a6b45b0ab43e5b0c50f29d216",
+          "version": "2.2.0"
         }
       },
       {
@@ -222,8 +222,8 @@
         "repositoryURL": "https://github.com/vapor/sqlite.git",
         "state": {
           "branch": null,
-          "revision": "f364a11e86dca9cac51b21c4a95cb5b214a669a3",
-          "version": "2.1.0"
+          "revision": "9aceb6a0d7b1698a557647493bd78b030dad468b",
+          "version": "2.3.1"
         }
       },
       {

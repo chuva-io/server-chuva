@@ -122,9 +122,6 @@ extension User: PasswordAuthenticatable {
 
 fileprivate class Verifier: PasswordVerifier {
     func verify(password: Bytes, matches hash: Bytes) throws -> Bool {
-        // FIX: password string appends ':'. e.g.: "password" -> ":password"
-        // Drop ':'. This is a temporary fix. Should fix in public source and submit PR.
-        let hackedPassword = password.makeString().dropFirst().data(using: .utf8)!.makeBytes()
-        return try _hash.check(_hash.make(hackedPassword), matchesHash: hash)
+        return try _hash.check(_hash.make(password), matchesHash: hash)
     }
 }
