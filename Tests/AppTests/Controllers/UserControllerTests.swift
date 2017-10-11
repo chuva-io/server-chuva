@@ -26,6 +26,11 @@ class UserControllerTests: TestCase {
                 "Authorization": "Bearer \(token.token)"]
     }
     
+    func badAuthHeaders() -> [HeaderKey: String] {
+        return ["Content-Type": "application/json",
+                "Authorization": "Bearer garbage"]
+    }
+    
     
     //MARK: - Tests
     
@@ -342,6 +347,7 @@ class UserControllerTests: TestCase {
     func test_AuthenticatedRequests() throws {
         typealias AuthRequest = (HTTP.Method, String)
         
+        // Requests to be tested for authentication
         let authRequests: [AuthRequest] = [(.get, "/users"),
                                            (.get, "/users/me"),
                                            (.get, "/users/_id"),
@@ -355,17 +361,27 @@ class UserControllerTests: TestCase {
         XCTAssertNoThrow(try token.save())
         
         for r in authRequests {
+            
+            // Without Authorization header
             let request = Request(method: r.0,
                                   uri: r.1,
                                   headers: defaultHeaders)
             let response = try drop.testResponse(to: request)
             response.assertStatus(is: .unauthorized)
             
+            // With good Authorization header
             let authRequest = Request(method: r.0,
                                       uri: r.1,
                                       headers: authHeaders(token: token))
             let authResponse = try drop.testResponse(to: authRequest)
             XCTAssertFalse(authResponse.status == .unauthorized)
+            
+            // With bad Authorization header
+            let badAuthRequest = Request(method: r.0,
+                                      uri: r.1,
+                                      headers: badAuthHeaders())
+            let badAuthResponse = try drop.testResponse(to: badAuthRequest)
+            badAuthResponse.assertStatus(is: .unauthorized)
         }
     }
 
