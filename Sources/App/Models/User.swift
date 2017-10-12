@@ -5,8 +5,8 @@ final class User: Model {
     
     let storage = Storage()
     
-    let username: String
-    var password: String
+    var username: String? = nil
+    var password: String? = nil
     var firstName: String? = nil
     var lastName: String? = nil
     var email: String? = nil
@@ -29,7 +29,7 @@ final class User: Model {
         return row
     }
     
-    init(username: String, password: String, id: Identifier? = nil, firstName: String? = nil, lastName: String? = nil, email: String? = nil) {
+    init(username: String? = nil, password: String? = nil, id: Identifier? = nil, firstName: String? = nil, lastName: String? = nil, email: String? = nil) {
         self.username = username
         self.password = password
         self.id = id
@@ -42,12 +42,12 @@ final class User: Model {
 extension User: JSONConvertible {
     
     convenience init(json: JSON) throws {
-        self.init(username: try json.get("username"),
-                  password: try json.get("password"),
-                  id: try json.get("id"),
-                  firstName: try json.get("firstName"),
-                  lastName: try json.get("lastName"),
-                  email: try json.get("email"))
+        self.init(username: try json.get("username") ?? nil,
+                  password: try json.get("password") ?? nil,
+                  id: try json.get("id") ?? nil,
+                  firstName: try json.get("firstName") ?? nil,
+                  lastName: try json.get("lastName") ?? nil,
+                  email: try json.get("email") ?? nil)
     }
     
     func makeJSON() throws -> JSON {
@@ -110,6 +110,7 @@ extension User: PasswordAuthenticatable {
     }
     
     public var hashedPassword: String? {
+        guard let password = password else { return nil }
         let digest = try! _hash.make(password)
         return digest.makeString()
     }
