@@ -10,11 +10,24 @@ class UserControllerTests: TestCase {
     let drop = try! Droplet.testable()
     
     func newTestUser(username: String = "jdoe123", firstName: String? = "John", lastName: String? = "Doe", email: String? = "jdoe123@doe.org", password: String = "password123") -> User {
-        return User(username: username, password: "password123", firstName: firstName, email: email)
+        let user = User(username: username, password: "password123", firstName: firstName, email: email)
+        try! user.save()
+        return user
     }
     
     func newToken(user: User) -> AuthToken {
-        return AuthToken(token: "token", userId: user.id!)
+        let token = AuthToken(token: "token", userId: user.id!)
+        return token
+    }
+    
+    func newToken() -> AuthToken {
+        let user = User(username: "generatedTestUser", password: "password123")
+        try! user.save()
+        
+        let token = AuthToken(token: "token", userId: user.id!)
+        try! token.save()
+        
+        return token
     }
     
     var defaultHeaders: [HeaderKey: String] {
@@ -26,13 +39,71 @@ class UserControllerTests: TestCase {
                 "Authorization": "Bearer \(token.token)"]
     }
     
+    func authHeaders() -> [HeaderKey: String] {
+        return authHeaders(token: newToken())
+    }
+    
     func badAuthHeaders() -> [HeaderKey: String] {
         return ["Content-Type": "application/json",
                 "Authorization": "Bearer garbage"]
     }
     
     
-    //MARK: - Tests
+    // MARK:- Tests
+    // MARK:-
+    
+    
+    // MARK: GET /users
+    func test_GetUsers() throws {
+        let user1 = User(username: "user1", password: "password")
+        try user1.save()
+        
+        let user2 = User(username: "user2", password: "pw", firstName: "John", lastName: "Doe", email: "jdoe123@jdoe.com")
+        try user2.save()
+        
+        let request = Request(method: .get,
+                              uri: "/users",
+                              headers: authHeaders())
+        let response = try drop.testResponse(to: request)
+        
+        // Response is 200
+        response.assertStatus(is: .ok, "Status should be 200")
+        
+        // Body is returned
+        XCTAssertNotNil(response.body.bytes, "Response should have body")
+        
+        // Body is json array
+        let json = try JSON(bytes: response.body.bytes!)
+        XCTAssertNotNil(json.array, "Response should be json array")
+        
+        // Response is serializable to Users
+        let serializedUsers: [User?] = json.array!.map { try? User(json: $0) }
+        XCTAssertEqual(serializedUsers.count, serializedUsers.flatMap { $0 }.count, "Some objects failed to serialize")
+        
+        // Response count is equal to database count
+        XCTAssertEqual(serializedUsers.count, try User.all().count, "Payload count does not match database count")
+    }
+    
+    
+    // MARK: GET /users/me
+    
+    
+    // MARK: GET /users/{id}
+    
+    
+    // MARK:-
+    
+    
+    // MARK: POST /users
+    
+    
+    // MARK: POST /users/signin
+    
+    
+    // MARK:-
+    
+    
+    // MARK: PATCH /users
     
 //    func test_Post() throws {
 //        /***** ARRANGE *****/
@@ -348,17 +419,13 @@ class UserControllerTests: TestCase {
         typealias AuthRequest = (HTTP.Method, String)
         
         // Requests to be tested for authentication
-        let authRequests: [AuthRequest] = [(.get, "/users"),
-                                           (.get, "/users/me"),
-                                           (.get, "/users/_id"),
-                                           (.post, "/users"),
+        let authRequests: [AuthRequest] = [(.get,   "/users"),
+                                           (.get,   "/users/me"),
+                                           (.get,   "/users/_id"),
+                                           (.post,  "/users"),
                                            (.patch, "/users")]
         
-        let user = newTestUser()
-        XCTAssertNoThrow(try user.save())
-        
-        let token = AuthToken(token: "token", userId: user.id!)
-        XCTAssertNoThrow(try token.save())
+        let authHeaders = self.authHeaders()
         
         for r in authRequests {
             
@@ -372,7 +439,7 @@ class UserControllerTests: TestCase {
             // With good Authorization header
             let authRequest = Request(method: r.0,
                                       uri: r.1,
-                                      headers: authHeaders(token: token))
+                                      headers: authHeaders)
             let authResponse = try drop.testResponse(to: authRequest)
             XCTAssertFalse(authResponse.status == .unauthorized)
             
