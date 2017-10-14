@@ -206,8 +206,65 @@ class UserControllerTests: TestCase {
 
 
     // MARK: GET /users/me
+    func test_GetMeProperties() throws {
+        let user = User(username: "username123",
+                        password: "password123",
+                        firstName: "fName",
+                        lastName: "lName",
+                        email: "email@email.com")
+        try user.save()
+        
+        let token = AuthToken(token: "token", userId: user.id!)
+        try token.save()
+        
+        let request = Request(method: .get,
+                              uri: "/users/me",
+                              headers: authHeaders(token: token))
+        let response = try drop.testResponse(to: request)
+        
+        // Body is json array
+        let json = try JSON(bytes: response.body.bytes!)
+        XCTAssertNil(json.array)
+        
+        // Property exists
+        XCTAssertNotNil(json["id"])
+        XCTAssertNotNil(json["username"])
+        XCTAssertNotNil(json["firstName"])
+        XCTAssertNotNil(json["lastName"])
+        XCTAssertNotNil(json["email"])
+        
+        // Property does not exist
+        XCTAssertNil(json["password"])
+    }
     
-    
+    func test_GetMePropertyTypes() throws {
+        let user = User(username: "username123",
+                        password: "password123",
+                        firstName: "fName",
+                        lastName: "lName",
+                        email: "email@email.com")
+        try user.save()
+        
+        let token = AuthToken(token: "token", userId: user.id!)
+        try token.save()
+        
+        let request = Request(method: .get,
+                              uri: "/users/me",
+                              headers: authHeaders(token: token))
+        let response = try drop.testResponse(to: request)
+        
+        // Body is json array
+        let json = try JSON(bytes: response.body.bytes!)
+        
+        // Equal values
+        XCTAssertEqual(json["id"]?.string, user.id?.string)
+        XCTAssertEqual(json["username"]?.string, user.username)
+        XCTAssertEqual(json["firstName"]?.string, user.firstName)
+        XCTAssertEqual(json["lastName"]?.string, user.lastName)
+        XCTAssertEqual(json["email"]?.string, user.email)
+    }
+
+
     // MARK: GET /users/{id}
     
 
