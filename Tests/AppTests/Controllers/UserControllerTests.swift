@@ -138,12 +138,8 @@ class UserControllerTests: TestCase {
         let json = try JSON(bytes: response.body.bytes!)
         XCTAssertNotNil(json.array, "Response should be json array")
 
-        // Response is serializable to Users
-        let serializedUsers: [User?] = json.array!.map { try? User(json: $0) }
-        XCTAssertEqual(serializedUsers.count, serializedUsers.flatMap { $0 }.count, "Some objects failed to serialize")
-
         // Response count is equal to database count
-        XCTAssertEqual(serializedUsers.count, try User.all().count, "Payload count does not match database count")
+        XCTAssertEqual(json.array!.count, try User.all().count, "Payload count does not match database count")
     }
 
     func test_GetUsersProperties() throws {
