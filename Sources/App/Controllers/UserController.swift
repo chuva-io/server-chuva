@@ -10,7 +10,13 @@ final class UserController {
         
         // MARK: GET /users
         droplet.authorized.get("users") { request in
-            return try User.all().makeJSON()
+            let users: [JSON] = try User.all().flatMap {
+                var json: JSON = try $0.makeJSON()
+                json.removeKey("email")
+                json.removeKey("password")
+                return json
+            }
+            return try users.makeJSON()
         }
         
         
