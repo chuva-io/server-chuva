@@ -18,7 +18,9 @@ final class UserController {
         
         // MARK: GET /users/me
         droplet.authorized.get("users/me") { request in
-            return try request.authenticatedUser().makeJSON()
+            var json = try request.authenticatedUser().makeJSON()
+            json.removeKey("password")
+            return json
         }
         
         
@@ -34,6 +36,7 @@ final class UserController {
             
             var json = try user.makeJSON()
             json.removeKey("email")
+            json.removeKey("password")
             return json
         }
         
@@ -42,13 +45,18 @@ final class UserController {
         
         
         // MARK: POST /users
-        droplet.authorized.post("users") { request in
+        droplet.post("users") { request in
             guard let json = request.json else {
                 throw Abort(.badRequest, reason: "no json provided")
             }
             
             let user: User
             do {
+                guard json["email"]?.string != nil,
+                    json["password"]?.string != nil,
+                    json["username"]?.string != nil else {
+                        throw Abort(.badRequest, reason: "bad json")
+                }
                 user = try User(json: json)
             }
             catch {
@@ -56,7 +64,9 @@ final class UserController {
             }
             try user.save()
             
-            return try Response(status: .created, json: user.makeJSON())
+            var responseJson = try user.makeJSON()
+            responseJson.removeKey("password")
+            return try Response(status: .created, json: responseJson)
         }
         
         

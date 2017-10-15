@@ -57,6 +57,7 @@ extension User: JSONConvertible {
         try json.set("lastName", lastName)
         try json.set("username", username)
         try json.set("email", email)
+        try json.set("password", password)
 
         return json
     }
@@ -78,6 +79,17 @@ extension User: Preparation {
     
     static func revert(_ database: Database) throws {
         try database.delete(self)
+    }
+}
+
+extension User: CustomDebugStringConvertible {
+    var debugDescription: String {
+        return """
+        username: \(username ?? "nil")
+        email: \(email ?? "nil")
+        firstName: \(firstName ?? "nil")
+        lastName: \(lastName ?? "nil")
+        """
     }
 }
 

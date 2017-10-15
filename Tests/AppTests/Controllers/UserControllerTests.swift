@@ -38,7 +38,7 @@ class UserControllerTests: TestCase {
         
         // Assert authorized
         XCTAssertFalse(authResponse?.status == .unauthorized,
-                       "\(authResponse?.status.statusCode) is equal to \(Status.unauthorized.statusCode)")
+                       "\(String(describing: authResponse?.status.statusCode)) is equal to \(Status.unauthorized.statusCode)")
     }
 
     // Wrong username or password fails authentication
@@ -89,7 +89,6 @@ class UserControllerTests: TestCase {
         let authRequests: [AuthRequest] = [(.get,   "/users"),
                                            (.get,   "/users/me"),
                                            (.get,   "/users/_id"),
-                                           (.post,  "/users"),
                                            (.patch, "/users")]
 
         let authHeaders = self.authHeaders()
@@ -371,7 +370,78 @@ class UserControllerTests: TestCase {
 
 
     // MARK: POST /users
+    
+    func test_UsernamePasswordAndEmailRequired() throws {
+        let noPasswordUser = User(username: "username1",
+                                  email: "email@email.com")
+        
+        let noEmailUser = User(username: "username2",
+                               password: "password123")
+        
+        let noUsernameUser = User(password: "password123",
+                                  email: "email@email.com")
+        
+        // Expected failures
+        let failingUsers = [noPasswordUser, noEmailUser, noUsernameUser]
+        for user in failingUsers {
+            let request = Request(method: .post,
+                                  uri: "/users",
+                                  headers: defaultHeaders,
+                                  body: try user.makeJSON().makeBody())
+            var response: Response? = nil
+            XCTAssertNoThrow(response = try drop.testResponse(to: request))
+            response?.assertStatus(is: .badRequest, "User: \n\(user)\n stored enexpectedly")
+        }
+    }
+    
+    func test_PostUsers() throws {
+        let user = User(username: "username123",
+                        password: "password123",
+                        email: "email@email.com")
+        
+        let request = Request(method: .post,
+                              uri: "/users",
+                              headers: defaultHeaders,
+                              body: try user.makeJSON().makeBody())
+        
+        // Response is 201
+        var response: Response? = nil
+        XCTAssertNoThrow(response = try drop.testResponse(to: request))
+        response?.assertStatus(is: .created)
+        
+        // Response is json
+        var json: JSON? = nil
+        XCTAssertNoThrow(json = try JSON(bytes: response!.body.bytes!))
+        XCTAssertNil(json?.array, "Response should not be json array")
+    }
+    
+    func test_PostUsersProperties() throws {
+        let user = User(username: "username123",
+                        password: "password123",
+                        email: "email@email.com")
+        
+        let request = Request(method: .post,
+                              uri: "/users",
+                              headers: defaultHeaders,
+                              body: try user.makeJSON().makeBody())
+        
+        var response: Response? = nil
+        XCTAssertNoThrow(response = try drop.testResponse(to: request))
+        response?.assertStatus(is: .created)
+        
+        var json: JSON? = nil
+        XCTAssertNoThrow(json = try JSON(bytes: response!.body.bytes!))
+        
+        // Property exists
+        XCTAssertNotNil(json?["id"])
+        XCTAssertNotNil(json?["username"])
+        XCTAssertNotNil(json?["firstName"])
+        XCTAssertNotNil(json?["lastName"])
+        XCTAssertNotNil(json?["email"])
 
+        // Property does not exist
+        XCTAssertNil(json?["password"])
+    }
 
     // MARK: POST /users/signin
 
