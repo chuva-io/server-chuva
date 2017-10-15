@@ -19,9 +19,12 @@ class UserControllerTests: TestCase {
         let request = Request(method: .post,
                               uri: "/users/signin",
                               headers: defaultHeaders)
-        let response = try drop.testResponse(to: request)
+        
+        var response: Response? = nil
+        XCTAssertNoThrow(response = try drop.testResponse(to: request))
+        
         // Assert unauthorized
-        response.assertStatus(is: .unauthorized)
+        response?.assertStatus(is: .unauthorized)
 
         // Create request with HTTPBasicAuth
         let auth = Data("user123:pw123".utf8).base64EncodedString()
@@ -29,10 +32,13 @@ class UserControllerTests: TestCase {
                                   uri: "/users/signin",
                                   headers: ["Content-Type": "application/json",
                                             "Authorization": "Basic \(auth)"])
-        let authResponse = try drop.testResponse(to: authRequest)
+        
+        var authResponse: Response? = nil
+        XCTAssertNoThrow(authResponse = try drop.testResponse(to: authRequest))
+        
         // Assert authorized
-        XCTAssertFalse(authResponse.status == .unauthorized,
-                       "\(authResponse.status.statusCode) is equal to \(Status.unauthorized.statusCode)")
+        XCTAssertFalse(authResponse?.status == .unauthorized,
+                       "\(authResponse?.status.statusCode) is equal to \(Status.unauthorized.statusCode)")
     }
 
     // Wrong username or password fails authentication
@@ -202,6 +208,24 @@ class UserControllerTests: TestCase {
 
 
     // MARK: GET /users/me
+    
+    func test_GetMe() throws {
+        let request = Request(method: .get,
+                              uri: "/users/me",
+                              headers: authHeaders())
+        let response = try drop.testResponse(to: request)
+        
+        // Response is 200
+        response.assertStatus(is: .ok, "Status should be 200")
+        
+        // Body is returned
+        XCTAssertNotNil(response.body.bytes, "Response should have body")
+        
+        // Body is json
+        let json = try JSON(bytes: response.body.bytes!)
+        XCTAssertNil(json.array, "Response should not be json array")
+    }
+    
     func test_GetMeProperties() throws {
         let user = User(username: "username123",
                         password: "password123",
@@ -216,11 +240,10 @@ class UserControllerTests: TestCase {
         let request = Request(method: .get,
                               uri: "/users/me",
                               headers: authHeaders(token: token))
+        
         let response = try drop.testResponse(to: request)
         
-        // Body is json array
         let json = try JSON(bytes: response.body.bytes!)
-        XCTAssertNil(json.array)
         
         // Property exists
         XCTAssertNotNil(json["id"])
@@ -247,9 +270,9 @@ class UserControllerTests: TestCase {
         let request = Request(method: .get,
                               uri: "/users/me",
                               headers: authHeaders(token: token))
+        
         let response = try drop.testResponse(to: request)
         
-        // Body is json array
         let json = try JSON(bytes: response.body.bytes!)
         
         // Equal values
@@ -262,6 +285,86 @@ class UserControllerTests: TestCase {
 
 
     // MARK: GET /users/{id}
+    
+    func test_GetUserById() throws {
+        let user = User(username: "username123",
+                        password: "password123")
+        try user.save()
+        
+        let token = AuthToken(token: "token", userId: user.id!)
+        try token.save()
+        
+        let request = Request(method: .get,
+                              uri: "/users/\(user.id!.string!)",
+                              headers: authHeaders(token: token))
+        
+        let response = try drop.testResponse(to: request)
+        
+        // Response is 200
+        response.assertStatus(is: .ok, "Status should be 200")
+        
+        // Body is returned
+        XCTAssertNotNil(response.body.bytes, "Response should have body")
+        
+        // Body is json
+        var json: JSON? = nil
+        XCTAssertNoThrow(json = try JSON(bytes: response.body.bytes!), "Body is not json")
+        XCTAssertNil(json?.array, "Response should not be json array")
+    }
+    
+    func test_GetUserByIdProperties() throws {
+        let user = User(username: "username123",
+                        password: "password123")
+        XCTAssertNoThrow(try user.save())
+        
+        let token = AuthToken(token: "token", userId: user.id!)
+        XCTAssertNoThrow(try token.save())
+        
+        let request = Request(method: .get,
+                              uri: "/users/\(user.id!.string!)",
+            headers: authHeaders(token: token))
+        
+        var response: Response? = nil
+        XCTAssertNoThrow(response = try drop.testResponse(to: request))
+        
+        var json: JSON? = nil
+        XCTAssertNoThrow(json = try JSON(bytes: response!.body.bytes!))
+        
+        // Property exists
+        XCTAssertNotNil(json?["id"])
+        XCTAssertNotNil(json?["username"])
+        XCTAssertNotNil(json?["firstName"])
+        XCTAssertNotNil(json?["lastName"])
+        
+        // Property does not exist
+        XCTAssertNil(json?["email"])
+        XCTAssertNil(json?["password"])
+    }
+    
+    func test_GetUserByIdPropertyTypes() throws {
+        let user = User(username: "username123",
+                        password: "password123")
+        XCTAssertNoThrow(try user.save())
+        
+        let token = AuthToken(token: "token", userId: user.id!)
+        XCTAssertNoThrow(try token.save())
+        
+        let request = Request(method: .get,
+                              uri: "/users/\(user.id!.string!)",
+            headers: authHeaders(token: token))
+        
+        var response: Response? = nil
+        XCTAssertNoThrow(response = try drop.testResponse(to: request))
+        
+        var json: JSON? = nil
+        XCTAssertNoThrow(json = try JSON(bytes: response!.body.bytes!), "Response body is not json")
+        
+        // Equal values
+        XCTAssertEqual(json?["id"]?.string, user.id?.string)
+        XCTAssertEqual(json?["username"]?.string, user.username)
+        XCTAssertEqual(json?["firstName"]?.string, user.firstName)
+        XCTAssertEqual(json?["lastName"]?.string, user.lastName)
+    }
     
 
     // MARK:-
@@ -475,49 +578,6 @@ class UserControllerTests: TestCase {
 //            return
 //        }
 //    }
-
-//    func test_Get() throws {
-//        /***** ARRANGE *****/
-//        let user = newTestUser()
-//        try user.save()
-//
-//        /******* ACT *******/
-//        let request = Request(method: .get,
-//                              uri: "/users",
-//                              headers: ["Content-Type": "application/json"])
-//        let response = try drop.testResponse(to: request)
-//
-//        /****** ASSERT *****/
-//        // response is 200
-//        response.assertStatus(is: .ok)
-//
-//        // test response is json
-//        guard let responseJson = response.json?.array else {
-//            XCTFail("Error getting json from response: \(response)")
-//            return
-//        }
-//
-//        var users: [User] = []
-//        for json in responseJson {
-//            users.append(try User(json: json))
-//        }
-//
-//        XCTAssertEqual(try User.all().count, 1)
-//
-//        let user1 = users[0]
-//        XCTAssertEqual(user.id, user1.id)
-//        XCTAssertEqual(user.firstName, user1.firstName)
-//        XCTAssertEqual(user.lastName, user1.lastName)
-//        XCTAssertEqual(user.email, user1.email)
-//        XCTAssertEqual(user.username, user1.username)
-//
-//        try newTestUser().save()
-//        XCTAssertEqual(try User.all().count, 2)
-//
-//        try newTestUser().save()
-//        XCTAssertEqual(try User.all().count, 3)
-//    }
-
 
     // MARK:- Helpers
 

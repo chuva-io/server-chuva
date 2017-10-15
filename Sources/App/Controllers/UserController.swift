@@ -4,10 +4,6 @@ final class UserController {
     
     static func setupRoutes(_ droplet: Droplet) {
         
-        
-        // MARK:-
-        
-        
         // MARK: GET /users
         droplet.authorized.get("users") { request in
             let users: [JSON] = try User.all().flatMap {
@@ -28,7 +24,17 @@ final class UserController {
         
         // MARK: GET /users/{id}
         droplet.authorized.get("users", ":id") { request in
-            return ""
+            guard let id = request.parameters["id"]?.string else {
+                throw Abort.badRequest
+            }
+            
+            guard let user = try User.find(id) else {
+                throw Abort.notFound
+            }
+            
+            var json = try user.makeJSON()
+            json.removeKey("email")
+            return json
         }
         
         
@@ -91,9 +97,6 @@ final class UserController {
 //            return try user.makeJSON()
             return ""
         }
-        
-        
-        // MARK:-
         
     }
     
