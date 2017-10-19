@@ -36,4 +36,11 @@ class TestCase: XCTestCase {
         Node.fuzzy = [Row.self, JSON.self, Node.self]
         Testing.onFail = XCTFail
     }
+    
+    override func tearDown() {
+        _ = try! Server("mongodb://localhost:27017")[TEST_DB]
+            .map { try $0.remove() }
+        Node.fuzzy = [Row.self, JSON.self, Node.self]
+        Testing.onFail = XCTFail
+    }
 }
