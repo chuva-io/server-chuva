@@ -444,6 +444,150 @@ class UserControllerTests: TestCase {
     }
 
     // MARK: POST /users/signin
+    
+    func test_PostUsersSignIn() throws {
+        let user = User(username: "user123", password: "pw123")
+        XCTAssertNoThrow(try user.save())
+        
+        // Create request with HTTPBasicAuth
+        let auth = Data("user123:pw123".utf8).base64EncodedString()
+        let request = Request(method: .post,
+                              uri: "/users/signin",
+                              headers: ["Content-Type": "application/json",
+                                        "Authorization": "Basic \(auth)"])
+        
+        var response: Response? = nil
+        XCTAssertNoThrow(response = try drop.testResponse(to: request))
+        
+        // Response is 200
+        response?.assertStatus(is: .ok)
+        
+        // Response is json
+        var json: JSON? = nil
+        XCTAssertNoThrow(json = try JSON(bytes: response!.body.bytes!))
+        XCTAssertNil(json?.array, "Response should not be json array")
+    }
+    
+    func test_PostUsersSignInPropertyTypes() throws {
+        let user = User(username: "username123",
+                        password: "password123")
+        XCTAssertNoThrow(try user.save())
+        
+        let auth = Data("username123:password123".utf8).base64EncodedString()
+        let request = Request(method: .post,
+                              uri: "/users/signin",
+                              headers: ["Content-Type": "application/json",
+                                        "Authorization": "Basic \(auth)"])
+        
+        var response: Response? = nil
+        XCTAssertNoThrow(response = try drop.testResponse(to: request))
+        
+        var json: JSON? = nil
+        XCTAssertNoThrow(json = try JSON(bytes: response!.body.bytes!), "Response body is not json")
+        
+        // Equal values
+        XCTAssertEqual(json?["id"]?.string, user.id?.string)
+        XCTAssertEqual(json?["username"]?.string, user.username)
+        XCTAssertEqual(json?["firstName"]?.string, user.firstName)
+        XCTAssertEqual(json?["lastName"]?.string, user.lastName)
+        
+        // Token provided
+        XCTAssertNotNil(json?["token"]?.string, "No auth token provided")
+    }
+    
+    func test_PostUsersSignInProperties() throws {
+        let user = User(username: "username123",
+                        password: "password123")
+        XCTAssertNoThrow(try user.save())
+        
+        let auth = Data("username123:password123".utf8).base64EncodedString()
+        let request = Request(method: .post,
+                              uri: "/users/signin",
+                              headers: ["Content-Type": "application/json",
+                                        "Authorization": "Basic \(auth)"])
+        
+        var response: Response? = nil
+        XCTAssertNoThrow(response = try drop.testResponse(to: request))
+        
+        var json: JSON? = nil
+        XCTAssertNoThrow(json = try JSON(bytes: response!.body.bytes!))
+        
+        // Property exists
+        XCTAssertNotNil(json?["id"])
+        XCTAssertNotNil(json?["username"])
+        XCTAssertNotNil(json?["firstName"])
+        XCTAssertNotNil(json?["lastName"])
+        XCTAssertNotNil(json?["email"])
+        XCTAssertNotNil(json?["token"])
+        
+        // Property does not exist
+        XCTAssertNil(json?["password"])
+    }
+    
+    func test_PostUsersSignInTokenIsValid() throws {
+        let user = User(username: "username123",
+                        password: "password123")
+        XCTAssertNoThrow(try user.save())
+        
+        let auth = Data("username123:password123".utf8).base64EncodedString()
+        let request = Request(method: .post,
+                              uri: "/users/signin",
+                              headers: ["Content-Type": "application/json",
+                                        "Authorization": "Basic \(auth)"])
+        
+        var response: Response? = nil
+        XCTAssertNoThrow(response = try drop.testResponse(to: request))
+        
+        var json: JSON? = nil
+        XCTAssertNoThrow(json = try JSON(bytes: response!.body.bytes!))
+        
+        let token = json?["token"]?.string
+        XCTAssertNotNil(token, "Token should not be nil")
+        
+        // Token authenticated request
+        let tokenRequest = Request(method: .get,
+                                  uri: "/users/me",
+                                  headers: authHeaders(token: token!))
+        let tokenResponse = try drop.testResponse(to: tokenRequest)
+        XCTAssertFalse(tokenResponse.status == .unauthorized)
+    }
+    
+    func test_PostUsersSignTwiceReturnsSameToken() throws {
+        let user = User(username: "username123",
+                        password: "password123")
+        XCTAssertNoThrow(try user.save())
+        
+        let auth = Data("username123:password123".utf8).base64EncodedString()
+        
+        // First request
+        let request1 = Request(method: .post,
+                              uri: "/users/signin",
+                              headers: ["Content-Type": "application/json",
+                                        "Authorization": "Basic \(auth)"])
+        
+        var response1: Response? = nil
+        XCTAssertNoThrow(response1 = try drop.testResponse(to: request1))
+        
+        var json1 = try JSON(bytes: response1!.body.bytes!)
+        let token1 = json1["token"]?.string
+        XCTAssertNotNil(token1, "Token should not be nil")
+        
+        // Second request
+        let request2 = Request(method: .post,
+                               uri: "/users/signin",
+                               headers: ["Content-Type": "application/json",
+                                         "Authorization": "Basic \(auth)"])
+        
+        var response2: Response? = nil
+        XCTAssertNoThrow(response2 = try drop.testResponse(to: request2))
+        
+        var json2 = try JSON(bytes: response2!.body.bytes!)
+        let token2 = json2["token"]?.string
+        XCTAssertNotNil(token2, "Token should not be nil")
+        
+        // Same token
+        XCTAssertEqual(token1, token2)
+    }
 
 
     // MARK:-
@@ -681,6 +825,11 @@ class UserControllerTests: TestCase {
     func authHeaders(token: AuthToken) -> [HeaderKey: String] {
         return ["Content-Type": "application/json",
                 "Authorization": "Bearer \(token.token)"]
+    }
+    
+    func authHeaders(token: String) -> [HeaderKey: String] {
+        return ["Content-Type": "application/json",
+                "Authorization": "Bearer \(token)"]
     }
 
     func authHeaders() -> [HeaderKey: String] {

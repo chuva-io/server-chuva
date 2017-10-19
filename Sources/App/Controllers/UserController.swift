@@ -72,7 +72,35 @@ final class UserController {
         
         // MARK: POST /users/signin
         droplet.passwordProtected.post("users/signin") { request in
-            return try request.authenticatedUser().makeJSON()
+            var json = try request.authenticatedUser().makeJSON()
+            json.removeKey("password")
+            
+            // Check if user has token
+            if let token = try User.TokenType.makeQuery()
+                .filter(User.TokenType.self, "user__id", json["id"]?.string)
+                .first() {
+                try json.set("token", token.token)
+            }
+            else {
+                // Create token
+                let hasher = CryptoHasher(
+                    hash: .sha256,
+                    encoding: .hex
+                )
+                
+                let userIdString = try! request.authenticatedUser().id!.bytes!.makeString()
+                let random = Int.random(min: 0, max: 999999)
+                let digest = try! hasher.make("\(userIdString)\(random)")
+                let tokenString = digest.makeString()
+                
+                // Save token
+                let token = AuthToken(token: tokenString, userId: try request.authenticatedUser().id!)
+                try token.save()
+                
+                try json.set("token", tokenString)
+            }
+            
+            return try Response(status: .ok, json: json)
         }
         
         
